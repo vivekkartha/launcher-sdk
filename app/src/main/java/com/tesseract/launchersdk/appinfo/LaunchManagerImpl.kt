@@ -32,14 +32,14 @@ class LaunchManagerImpl(private val packageManager: PackageManager) : LauncherMa
                 versionName = getVersionName(app.packageName),
                 activityName = getLauncherIntent(app.packageName)?.component?.className
             )
-        }
+        }.sortedBy { it.name }
     }
 
-    private fun getVersionName(packageName: String): String =
-        packageManager.getPackageInfo(packageName, DEFAULT_FLAG).versionName
+    private fun getVersionName(packageName: String): String? =
+        packageManager.getPackageInfo(packageName, DEFAULT_FLAG).versionName ?: ""
 
-    private fun getVersionCode(packageName: String): Int =
-        packageManager.getPackageInfo(packageName, DEFAULT_FLAG).versionCode
+    private fun getVersionCode(packageName: String): Int? =
+        packageManager.getPackageInfo(packageName, DEFAULT_FLAG).versionCode ?: 0
 
     private fun getLauncherIntent(packageName: String): Intent? =
         packageManager.getLaunchIntentForPackage(packageName)
