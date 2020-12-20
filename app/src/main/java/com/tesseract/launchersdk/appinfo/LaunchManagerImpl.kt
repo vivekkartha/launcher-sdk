@@ -1,8 +1,8 @@
 package com.tesseract.launchersdk.appinfo
 
 import android.content.Intent
-import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -15,24 +15,33 @@ class LaunchManagerImpl(private val packageManager: PackageManager) : LauncherMa
     override fun getInstalledApps(onAppsListLoaded: (appsList: List<AppInfo>) -> Unit) {
         // Query installed apps in a worker thread
         GlobalScope.launch {
-            val rawAppsList: List<ApplicationInfo> =
-                packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+            val appInfoList = getInstalledAppList()?.let { apps ->
+                getAppsInfoList(apps)
+            }
             withContext(Main) {
-                onAppsListLoaded(getAppsList(rawAppsList))
+                appInfoList?.let { apps -> onAppsListLoaded(apps) }
             }
         }
     }
 
-    private fun getAppsList(rawAppsList: List<ApplicationInfo>): List<AppInfo> {
+    private fun getInstalledAppList(): List<ResolveInfo>? {
+        val intent = Intent(Intent.ACTION_MAIN, null)
+        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+        return packageManager.queryIntentActivities(intent, 0)
+    }
+
+    private fun getAppsInfoList(rawAppsList: List<ResolveInfo>): List<AppInfo> {
         return rawAppsList.map { app ->
-            AppInfo(
-                name = app.loadLabel(packageManager).toString(),
-                packageName = app.packageName,
-                icon = app.loadIcon(packageManager),
-                versionCode = getVersionCode(app.packageName),
-                versionName = getVersionName(app.packageName),
-                activityName = getLauncherIntent(app.packageName)?.component?.className
-            )
+            with(app.activityInfo) {
+                AppInfo(
+                    name = app.loadLabel(packageManager).toString(),
+                    packageName = packageName,
+                    icon = loadIcon(packageManager),
+                    versionCode = getVersionCode(packageName),
+                    versionName = getVersionName(packageName),
+                    activityName = getLauncherIntent(packageName)?.component?.className
+                )
+            }
         }.sortedBy { it.name }
     }
 
