@@ -1,5 +1,5 @@
 # Launcher SDK 
-Library that returns appName, versioCode, versionName, and launch package and activity of installed apps.
+Library that returns appName, versionCode, versionName, and launch package and activity of installed apps.
 Language: Kotlin 
 Platform: Android
 
