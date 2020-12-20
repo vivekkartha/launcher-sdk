@@ -3,5 +3,8 @@ Library that returns appName, versionCode, versionName, and launch package and a
 Language: Kotlin 
 Platform: Android
 
+#### Usage
+LauncherSdk.getInstance(Context)
+
 Generated AAR files of this SDK are used in https://github.com/vivekkartha/ract-launcher-app
     
