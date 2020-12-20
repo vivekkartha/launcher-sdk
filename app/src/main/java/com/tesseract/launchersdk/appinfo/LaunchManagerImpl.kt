@@ -3,23 +3,24 @@ package com.tesseract.launchersdk.appinfo
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class LaunchManagerImpl(private val packageManager: PackageManager) : LauncherManager {
-    private val _uninstallLiveData = MutableLiveData<AppInfo>()
-
-    val uninstallLiveData: LiveData<AppInfo>
-        get() = _uninstallLiveData
-
     /**
      * Returns AppInfo for all installed apps
      */
-    override fun getInstalledApps(): List<AppInfo> {
-        val rawAppsList: List<ApplicationInfo> =
-            packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-
-        return getAppsList(rawAppsList)
+    override fun getInstalledApps(onAppsListLoaded: (appsList: List<AppInfo>) -> Unit) {
+        // Query installed apps in a worker thread
+        GlobalScope.launch {
+            val rawAppsList: List<ApplicationInfo> =
+                packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+            withContext(Main) {
+                onAppsListLoaded(getAppsList(rawAppsList))
+            }
+        }
     }
 
     private fun getAppsList(rawAppsList: List<ApplicationInfo>): List<AppInfo> {

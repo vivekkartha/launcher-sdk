@@ -1,7 +1,5 @@
 package com.tesseract.launchersdk.appinfo
 
-import androidx.lifecycle.LiveData
-
 interface LauncherManager {
-    fun getInstalledApps(): List<AppInfo>
+    fun getInstalledApps(onAppsListLoaded: (appsList: List<AppInfo>) -> Unit)
 }
