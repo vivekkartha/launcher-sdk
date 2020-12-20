@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 class LaunchManagerImpl(private val packageManager: PackageManager) : LauncherManager {
     /**
@@ -42,7 +43,7 @@ class LaunchManagerImpl(private val packageManager: PackageManager) : LauncherMa
                     activityName = getLauncherIntent(packageName)?.component?.className
                 )
             }
-        }.sortedBy { it.name }
+        }.sortedBy { it.name?.toLowerCase(Locale.getDefault()) }
     }
 
     private fun getVersionName(packageName: String): String? =
